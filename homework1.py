@@ -1,4 +1,5 @@
 import numpy as np
+from typing import List
 
 def simplex_method(C, A, b, accuracy=1e-6):
     # Step 0: Initialize basic feasible solution
@@ -44,11 +45,90 @@ def simplex_method(C, A, b, accuracy=1e-6):
         if iteration > 1000:  # Safety check to avoid infinite loop
             return "The method did not converge"
 
+
+def get_objective_func_coefs_prompt() -> List[float]:
+    C = []
+
+    try:
+        input_str = input("\nEnter coefficients of the objective funciton, separated by space (for example \"1 2 3\"):\n")
+        C = [float(num) for num in input_str.split()]
+    except ValueError:
+        print("\nInvalid input. Please enter numbers separated by spaces.")
+        print("Example: 1 -1 0 2")
+        exit()
+
+    return C
+
+
+def get_constraints_coefs_prompt(variables_num : int) -> np.ndarray:
+    try:
+        num_rows = int(input("\nEnter the number of constraints functions: "))
+    except ValueError:
+        print("\nInvalid input. Please enter only one positive number.")
+        print("Example: 1")
+        exit()
+
+    A = np.empty((num_rows, len(C)), dtype=float)
+
+    for i in range(num_rows):
+        try:
+            input_str = input(f"Enter coefficients ({variables_num}) of the constraint funciton №{i+1}:\n")
+            coefs = [float(num) for num in input_str.split()]
+
+            if len(coefs) != variables_num:
+                print(f"Invalid input. Number of coefficients is not equal to the number of variables ({len(coefs)} != {variables_num})")
+                exit()
+
+            for j in range(len(A[i])):
+                A[i][j] = coefs[j]
+
+        except ValueError:
+            print("\nInvalid input. Please enter numbers separated by spaces.")
+            print("Example: 1 -1 0 2")
+            exit()
+
+    return A
+
+
+def get_b_vector(constraints_num : int) -> List[float]:
+    b = []
+    try:
+        input_str = input(f"\nEnter b vector (size = {constraints_num}):\n")
+        b = [float(num) for num in input_str.split()]
+    except ValueError:
+        print("\nInvalid input. Please enter numbers separated by spaces.")
+        print("Example: 1 -1 0 2")
+        exit()
+
+    if len(b) != constraints_num:
+        print(f"Invalid input. Number of constraints ({constraints_num}) != size of b (({int(len(b))}.")
+        exit()
+
+    return b
+
+
+def print_prompted_data(C, A, b, accuracy):
+    print("\n----------------------------\n")
+    print("Objective function coefs:", C)
+    print("Constraint functions coefs:\n", A)
+    print("B vector:", b)
+    print("Accuracy:", accuracy)
+    print("\n----------------------------\n")
+
+
 if __name__ == "__main__":
-    C = [2, 3, -1]  # Coefficients of the objective function (maximize 2x1 + 3x2 - x3)
-    A = np.array([[1, 1, 1], [2, -1, 1]])  # Coefficients of the constraint functions
-    b = [4, 2]  # Right-hand side numbers
+
+    C = get_objective_func_coefs_prompt()
+
+    variables_num = len(C)
+    A = get_constraints_coefs_prompt(variables_num)
+
+    constaints_num = len(A)
+    b = get_b_vector(constaints_num)
+
     accuracy = 1e-6
+
+    print_prompted_data(C, A, b, accuracy)
 
     result = simplex_method(C, A, b, accuracy)
 
@@ -58,3 +138,5 @@ if __name__ == "__main__":
         x_star, z_star = result
         print("Optimal solution:", x_star)
         print("Optimal value:", z_star)
+
+    print("\n----------------------------\n")
