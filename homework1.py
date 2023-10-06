@@ -2,18 +2,17 @@ import numpy as np
 from typing import List
 
 def simplex_method(C, A, b, accuracy=1e-6):
-    # Step 0: Initialize basic feasible solution
     m, n = len(A), len(C)
     B = np.arange(n, n + m)  # Initial basis
-    C_B = np.array([C[i] for i in B - n])  # Coefficients of the basic variables
-    X_B = np.linalg.solve(A[:, B - n], b)  # Basic variable values
+    C_B = np.array([C[i] if i < n else 0 for i in B - n])  # Coefficients of the basic variables
+    try:
+        X_B = np.linalg.solve(A[:, B - n], b)  # Basic variable values
+    except np.linalg.LinAlgError:
+        return "The method is not applicable!"
     iteration = 0
 
     while True:
-        # Step 1: Compute the inverse of B
         B_inv = np.linalg.inv(A[:, B - n])
-
-        # Step 2: Compute z_j - c_j for all nonbasic variables
         z_minus_c = np.dot(C_B, B_inv).dot(A) - C
 
         if all(z_minus_c >= -accuracy):  # Optimality condition
@@ -23,20 +22,15 @@ def simplex_method(C, A, b, accuracy=1e-6):
             z_star = np.dot(C_B, X_B)
             return x_star, z_star
 
-        # Step 3: Find entering variable P_j
         j_enter = np.argmin(z_minus_c)
-
-        # Step 4: Compute B^-1 * P_j
         d = np.dot(B_inv, A[:, j_enter])
 
         if all(d <= accuracy):  # Unbounded case
             return "The method is not applicable!"
 
-        # Step 5: Find leaving variable P_i using ratio test
         ratios = [X_B[i] / d[i] if d[i] > 0 else np.inf for i in range(m)]
         i_leave = np.argmin(ratios)
 
-        # Step 6: Update basis and basic variables
         B[i_leave] = j_enter
         C_B[i_leave] = C[j_enter]
         X_B[i_leave] = b[i_leave] / d[i_leave]
