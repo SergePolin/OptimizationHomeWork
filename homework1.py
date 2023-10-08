@@ -1,136 +1,144 @@
 import numpy as np
-from typing import List
 
-def simplex_method(C, A, b, accuracy=1e-6):
-    m, n = len(A), len(C)
-    B = np.arange(n, n + m)  # Initial basis
-    C_B = np.array([C[i] if i < n else 0 for i in B - n])  # Coefficients of the basic variables
-    try:
-        X_B = np.linalg.solve(A[:, B - n], b)  # Basic variable values
-    except np.linalg.LinAlgError:
-        return "The method is not applicable!"
-    iteration = 0
+# A function to print a vector
+def print_vector(v):
+    print(" ".join(map(str, v)))
 
+# A function to print a matrix
+def print_matrix(m):
+    for row in m:
+        print_vector(row)
+    print()
+
+# A function to find the pivot column in the simplex tableau
+def find_pivot_column(c, epsilon):
+    pivot_col = -1  # initialize with -1 to indicate no pivot column
+    min_c = 0  # initialize with 0 to find the most negative coefficient
+    for j in range(len(c)):
+        if c[j] < min_c - epsilon:  # use epsilon to avoid numerical errors
+            min_c = c[j]
+            pivot_col = j
+    return pivot_col
+
+# A function to find the pivot row in the simplex tableau
+def find_pivot_row(a, b, pivot_col, epsilon):
+    pivot_row = -1  # initialize with -1 to indicate no pivot row
+    min_ratio = float("inf")  # initialize with infinity to find the minimum ratio
+    for i in range(len(a)):
+        if a[i][pivot_col] > epsilon:  # use epsilon to avoid division by zero
+            ratio = b[i] / a[i][pivot_col]  # compute the ratio of b[i] to a[i][pivot_col]
+            if ratio < min_ratio - epsilon:  # use epsilon to avoid numerical errors
+                min_ratio = ratio
+                pivot_row = i
+    return pivot_row
+
+# A function to perform the pivot operation on the simplex tableau
+def pivot(a, b, c, pivot_row, pivot_col):
+    m, n = a.shape
+
+    # divide the pivot row by the pivot element
+    pivot_element = a[pivot_row, pivot_col]
+    a[pivot_row, :] /= pivot_element
+    b[pivot_row] /= pivot_element
+
+    # subtract multiples of the pivot row from other rows
+    for i in range(m):
+        if i != pivot_row:
+            factor = a[i, pivot_col]
+            a[i, :] -= factor * a[pivot_row, :]
+            b[i] -= factor * b[pivot_row]
+
+    # update the objective function coefficients
+    factor = c[pivot_col]
+    c -= factor * a[pivot_row, :]
+
+# A function to implement the simplex method for linear programming problems
+def simplex(a, b, c, epsilon):
+    m, n = a.shape
+
+    # check if the count of elements in C is equal to the count of columns in A
+    if len(c) != n:
+        return []
+
+    # check if the count of elements in b is equal to the count of rows in A
+    if len(b) != m:
+        return []
+
+    # create an initial feasible solution by adding slack variables
+    tableau = np.zeros((m, n + m))
+    for i in range(m):
+        for j in range(n + m):
+            if j < n:
+                tableau[i, j] = a[i, j]
+            elif j == n + i:
+                tableau[i, j] = 1
+            else:
+                tableau[i, j] = 0
+
+    z = np.zeros(n + m)
+    z[:n] = c
+
+    # perform the simplex algorithm until an optimal solution is found or the problem is infeasible or unbounded
     while True:
-        B_inv = np.linalg.inv(A[:, B - n])
-        z_minus_c = np.dot(C_B, B_inv).dot(A) - C
+        # find the pivot column
+        pivot_col = find_pivot_column(z, epsilon)
 
-        if all(z_minus_c >= -accuracy):  # Optimality condition
-            x_star = np.zeros(n)
-            for i in range(m):
-                x_star[B[i] - n] = X_B[i]
-            z_star = np.dot(C_B, X_B)
-            return x_star, z_star
+        # if no pivot column is found, then the current solution is optimal
+        if pivot_col == -1:
+            break
 
-        j_enter = np.argmin(z_minus_c)
-        d = np.dot(B_inv, A[:, j_enter])
+        # find the pivot row
+        pivot_row = find_pivot_row(tableau, b, pivot_col, epsilon)
 
-        if all(d <= accuracy):  # Unbounded case
-            return "The method is not applicable!"
+        # if no pivot row is found, then the problem is unbounded
+        if pivot_row == -1:
+            return []
 
-        ratios = [X_B[i] / d[i] if d[i] > 0 else np.inf for i in range(m)]
-        i_leave = np.argmin(ratios)
+        # perform the pivot operation
+        pivot(tableau, b, z, pivot_row, pivot_col)
 
-        B[i_leave] = j_enter
-        C_B[i_leave] = C[j_enter]
-        X_B[i_leave] = b[i_leave] / d[i_leave]
+    # extract the optimal solution from the final tableau
+    x = np.zeros(n)
+    for j in range(n):
+        basic = False
+        basic_row = -1
+        for i in range(m):
+            if tableau[i, j] == 1:
+                if basic_row == -1:
+                    basic_row = i
+                    basic = True
+                else:
+                    basic = False
+                    break
+            elif tableau[i, j] != 0:
+                basic = False
+                break
+        if basic and basic_row != -1:
+            x[j] = b[basic_row]
+        else:
+            x[j] = 0
 
-        iteration += 1
-        if iteration > 1000:  # Safety check to avoid infinite loop
-            return "The method did not converge"
+    return x
 
-
-def get_objective_func_coefs_prompt() -> List[float]:
-    C = []
-
-    try:
-        input_str = input("\nEnter coefficients of the objective funciton, separated by space (for example \"1 2 3\"):\n")
-        C = [float(num) for num in input_str.split()]
-    except ValueError:
-        print("\nInvalid input. Please enter numbers separated by spaces.")
-        print("Example: 1 -1 0 2")
-        exit()
-
-    return C
-
-
-def get_constraints_coefs_prompt(variables_num : int) -> np.ndarray:
-    try:
-        num_rows = int(input("\nEnter the number of constraints functions: "))
-    except ValueError:
-        print("\nInvalid input. Please enter only one positive number.")
-        print("Example: 1")
-        exit()
-
-    A = np.empty((num_rows, len(C)), dtype=float)
-
-    for i in range(num_rows):
-        try:
-            input_str = input(f"Enter coefficients ({variables_num}) of the constraint funciton №{i+1}:\n")
-            coefs = [float(num) for num in input_str.split()]
-
-            if len(coefs) != variables_num:
-                print(f"Invalid input. Number of coefficients is not equal to the number of variables ({len(coefs)} != {variables_num})")
-                exit()
-
-            for j in range(len(A[i])):
-                A[i][j] = coefs[j]
-
-        except ValueError:
-            print("\nInvalid input. Please enter numbers separated by spaces.")
-            print("Example: 1 -1 0 2")
-            exit()
-
-    return A
-
-
-def get_b_vector(constraints_num : int) -> List[float]:
-    b = []
-    try:
-        input_str = input(f"\nEnter b vector (size = {constraints_num}):\n")
-        b = [float(num) for num in input_str.split()]
-    except ValueError:
-        print("\nInvalid input. Please enter numbers separated by spaces.")
-        print("Example: 1 -1 0 2")
-        exit()
-
-    if len(b) != constraints_num:
-        print(f"Invalid input. Number of constraints ({constraints_num}) != size of b (({int(len(b))}.")
-        exit()
-
-    return b
-
-
-def print_prompted_data(C, A, b, accuracy):
-    print("\n----------------------------\n")
-    print("Objective function coefs:", C)
-    print("Constraint functions coefs:\n", A)
-    print("B vector:", b)
-    print("Accuracy:", accuracy)
-    print("\n----------------------------\n")
-
-
+# A main function to test the simplex method
 if __name__ == "__main__":
+    # define the input data for a linear programming problem
+    c = np.array([2,2,1], dtype=float)  # coefficients of objective function 
+    a = np.array([[1, 1, 1], [2, -1, 1]], dtype=float)  # coefficients of constraint functions
+    b = np.array([4], dtype=float)  # right-hand side numbers of constraint functions
 
-    C = get_objective_func_coefs_prompt()
+    epsilon = 1e-6  # approximation accuracy
 
-    variables_num = len(C)
-    A = get_constraints_coefs_prompt(variables_num)
+    # call the simplex method to solve the problem
+    x = simplex(a, b, c, epsilon)
 
-    constaints_num = len(A)
-    b = get_b_vector(constaints_num)
+    # print the output
+    if len(x) == 0:  # if the problem is unbounded
+        print("The method is not applicable!")
+    else:  # otherwise, print the optimal solution and the objective function value
+        print("The optimal solution is:")
+        print_vector(x)
 
-    accuracy = 1e-6
+        z = np.dot(c, x)  # compute the objective function value
+        print("The minimum value of the objective function is:", z)
 
-    print_prompted_data(C, A, b, accuracy)
-
-    result = simplex_method(C, A, b, accuracy)
-
-    if isinstance(result, str):
-        print(result)
-    else:
-        x_star, z_star = result
-        print("Optimal solution:", x_star)
-        print("Optimal value:", z_star)
-
-    print("\n----------------------------\n")
