@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 
 .vscode
+n_test.py
+n_test2.py
