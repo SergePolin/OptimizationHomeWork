@@ -122,12 +122,28 @@ def simplex(a, b, c, epsilon):
 
 # A main function to test the simplex method
 if __name__ == "__main__":
-    # define the input data for a linear programming problem
-    c = np.array([2,2,1], dtype=float)  # coefficients of objective function 
-    a = np.array([[1, 1, 1], [2, -1, 1]], dtype=float)  # coefficients of constraint functions
-    b = np.array([4], dtype=float)  # right-hand side numbers of constraint functions
 
-    epsilon = 1e-6  # approximation accuracy
+    # input vector c from console
+    c = np.array(list(map(float, input("Enter the coefficients of the objective function: ").split())))
+    # input size of matrix A from console
+    m, n = map(int, input("Enter the size of matrix A (Example: 3 4): ").split())
+    # input matrix A from console
+    print("Enter the coefficients of constraint functions:")
+    a = np.array([list(map(float, input().split())) for _ in range(m)])
+    # input vector b from console
+    b = np.array(list(map(float, input("Enter the right-hand side numbers of constraint functions: ").split())))
+    # input approximation accuracy from console
+    epsilon = float(input("Enter the approximation accuracy: "))
+
+
+
+
+    # define the input data for a linear programming problem
+    # c = np.array([2,2,1], dtype=float)  # coefficients of objective function 
+    # a = np.array([[1, 1, 1], [2, -1, 1]], dtype=float)  # coefficients of constraint functions
+    # b = np.array([4], dtype=float)  # right-hand side numbers of constraint functions
+
+    # epsilon = 1e-6  # approximation accuracy
 
     # call the simplex method to solve the problem
     x = simplex(a, b, c, epsilon)
