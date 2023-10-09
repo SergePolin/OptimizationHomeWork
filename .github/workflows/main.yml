@@ -1,0 +1,22 @@
+name: Run pytest
+
+on: [push, pull_request]
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x  # Replace with your desired Python version
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt  # Replace with your dependencies file
+
+      - name: Run pytest
+        run: pytest
