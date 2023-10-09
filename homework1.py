@@ -122,7 +122,7 @@ def simplex(a, b, c, epsilon):
     return x
 
 
-if __name__ == "__main__":
+def main():
     c = np.array(list(map(float, input("Enter the coefficients of the objective function: ").split())))
     m, n = map(int, input("Enter the size of matrix A (Example: 3 4): ").split())
     print("Enter the coefficients of constraint functions:")
@@ -134,9 +134,13 @@ if __name__ == "__main__":
 
     if len(x) == 0:
         print("The method is not applicable!")
-    else:
-        print("The optimal solution is:")
-        print_vector(x)
-        z = np.dot(c, x)
-        print("The minimum value of the objective function is:", z)
+        return -1
+    z = np.dot(c, x)
+    return [x,z]
 
+if __name__ == "__main__":
+   res = main()
+   if res != -1:
+    print("The optimal solution is:")
+    print_vector(res[0])
+    print("The minimum value of the objective function is:", res[1])
