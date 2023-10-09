@@ -1,4 +1,5 @@
 # OptimizationHomeWork
+[![Run pytest](https://github.com/SergePolin/OptimizationHomeWork/actions/workflows/main.yml/badge.svg)](https://github.com/SergePolin/OptimizationHomeWork/actions/workflows/main.yml)
 This repository contains a Python implementation of an optimization algorithm for solving linear programming problems. The algorithm uses the simplex method to find the optimal solution to a given linear programming problem.
 
 ## Dependencies
