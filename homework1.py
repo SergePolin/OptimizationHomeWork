@@ -68,6 +68,9 @@ def simplex(a, b, c, epsilon):
     """
     m, n = a.shape
 
+    if np.all(a == 0) and np.all(b == 0) and np.all(c == 0):
+        return []
+
     if len(c) != n:
         return []
 
@@ -116,7 +119,7 @@ def simplex(a, b, c, epsilon):
         else:
             x[j] = 0
 
-    return x
+    return x, z
 
 
 if __name__ == "__main__":
@@ -135,4 +138,5 @@ if __name__ == "__main__":
         print("The optimal solution is:")
         print_vector(x)
         z = np.dot(c, x)
+        print(type(z))
         print("The minimum value of the objective function is:", z)
