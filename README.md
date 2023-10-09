@@ -1,44 +1,33 @@
 # OptimizationHomeWork
+This repository contains a Python implementation of an optimization algorithm for solving linear programming problems. The algorithm uses the simplex method to find the optimal solution to a given linear programming problem.
+
+## Dependencies
+
+To run this program, you will need to have the following dependencies installed:
+
+- Python 3.x
+- NumPy
 
 ## How to run
 
 ```bash
 git clone https://github.com/SergePolin/OptimizationHomeWork
 cd OptimizationHomeWork
+pip install -r requirements.txt
 python homework1.py
 ```
 
 ## Example
 
 ```
-Enter coefficients of the objective funciton, separated by space (for example "1 2 3"):
-1 2 3
-
-Enter the number of constraints functions: 3
-Enter coefficients (3) of the constraint funciton №1:
--1 2 5
-Enter coefficients (3) of the constraint funciton №2:
-5 2 6
-Enter coefficients (3) of the constraint funciton №3:
-3 1 7
-
-Enter b vector (size = 3):
-0 0 0
-
-----------------------------
-
-Objective function coefs: [1.0, 2.0, 3.0]
-Constraint functions coefs:
- [[-1.  2.  5.]
- [ 5.  2.  6.]
- [ 3.  1.  7.]]
-B vector: [0.0, 0.0, 0.0]
-Accuracy: 1e-06
-
-----------------------------
-
-Optimal solution: [0. 0. 0.]
-Optimal value: 0.0
-
-----------------------------
+Enter the coefficients of the objective function: 2 3 -1
+Enter the size of matrix A (Example: 3 4): 2 3
+Enter the coefficients of constraint functions:
+1 1 1
+2 -1 1
+Enter the right-hand side numbers of constraint functions: 4 2
+Enter the approximation accuracy: 1e-6
+The optimal solution is:
+0.0 0.0 2.0
+The minimum value of the objective function is: -2.0
 ```
