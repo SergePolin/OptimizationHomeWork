@@ -76,6 +76,16 @@ def test_simplex6():
     assert np.allclose(x, np.array([0, 14]))
     assert np.allclose(z, 42)
 
+def test_simplex7():
+    a = np.array([[-1, 2]])
+    b = np.array([3, 5])
+    c = np.array([-2])
+    epsilon = 1e-6
+    x, z = simplex(a, b, c, epsilon)
+    z = np.dot(c, x)
+    assert np.allclose(x, np.array([2.5]))
+    assert np.allclose(z, -5)
+
 
 
 # cases with exceptions:
@@ -98,18 +108,6 @@ def test_simplex6():
 # -1
 # 2
 # Enter the right-hand side numbers of constraint functions: 3 5 6
-# Enter the approximation accuracy: 1e-6
-# The method is not applicable!
-# PASSED
-
-
-# (3)
-# Enter the coefficients of the objective function: -2 1 0.5
-# Enter the size of matrix A (Example: 3 4): 2 3
-# Enter the coefficients of constraint functions:
-# -1 5 -0.3
-# 1 -4 0
-# Enter the right-hand side numbers of constraint functions: 2 3
 # Enter the approximation accuracy: 1e-6
 # The method is not applicable!
 # PASSED
