@@ -9,6 +9,7 @@ To run this program, you will need to have the following dependencies installed:
 
 - Python 3.x
 - NumPy
+- Pytest
 
 ## How to run
 
@@ -17,6 +18,11 @@ git clone https://github.com/SergePolin/OptimizationHomeWork
 cd OptimizationHomeWork
 pip install -r requirements.txt
 python homework1.py
+```
+
+# How to run tests
+```bash
+pytest tests.py
 ```
 
 ## Example
