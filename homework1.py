@@ -68,6 +68,9 @@ def simplex(a, b, c, epsilon):
     """
     m, n = a.shape
 
+    if np.all(a == 0) and np.all(b == 0) and np.all(c == 0):
+        return []
+
     if len(c) != n:
         return []
 
