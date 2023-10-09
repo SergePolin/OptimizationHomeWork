@@ -119,7 +119,7 @@ def simplex(a, b, c, epsilon):
         else:
             x[j] = 0
 
-    return x, z
+    return x
 
 
 if __name__ == "__main__":
@@ -138,5 +138,5 @@ if __name__ == "__main__":
         print("The optimal solution is:")
         print_vector(x)
         z = np.dot(c, x)
-        print(type(z))
         print("The minimum value of the objective function is:", z)
+
