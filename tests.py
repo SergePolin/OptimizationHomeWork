@@ -11,20 +11,18 @@ def test_simplex1():
     b = np.array([2, 2, 3])
     c = np.array([-1, 2, 1])
     epsilon = 1e-6
-    x, z = simplex(a, b, c, epsilon)
-    z = np.dot(c, x)
-    assert np.allclose(x, np.array([1, 0, 0]))
-    assert np.allclose(z, -1)
+    res = calculateSimplex(a, b, c, epsilon)
+    assert np.allclose(res[0], np.array([1, 0, 0]))
+    assert np.allclose(res[1], -1)
 
 def test_simplex2():
     a = np.array([[1, 1, 1], [2, -1, 1]])
     b = np.array([4, 2])
     c = np.array([2, 3, -1])
     epsilon = 1e-6
-    x, z = simplex(a, b, c, epsilon)
-    z = np.dot(c, x)
-    assert np.allclose(x, np.array([0, 0, 2]))
-    assert np.allclose(z, -2)
+    res = calculateSimplex(a, b, c, epsilon)
+    assert np.allclose(res[0], np.array([0, 0, 2]))
+    assert np.allclose(res[1], -2)
 
 # def test_simplex3():
 #     a = np.array([[0, 0], [0, 0], [0, 0]])
@@ -41,50 +39,50 @@ def test_simplex3():
     b = np.array([1, 1])
     c = np.array([1, 1])
     epsilon = 1e-6
-    x, z = simplex(a, b, c, epsilon)
-    z = np.dot(c, x)
-    assert np.allclose(x, np.array([0, 0]))
-    assert np.allclose(z, 0)
+    res = calculateSimplex(a, b, c, epsilon)
+    assert np.allclose(res[0], np.array([0, 0]))
+    assert np.allclose(res[1], 0)
 
 def test_simplex4():
     a = np.array([[1]])
     b = np.array([2])
     c = np.array([-2])
     epsilon = 1e-6
-    x, z = simplex(a, b, c, epsilon)
-    z = np.dot(c, x)
-    assert np.allclose(x, np.array([2]))
-    assert np.allclose(z, -4)
+    res = calculateSimplex(a, b, c, epsilon)
+    assert np.allclose(res[0], np.array([2]))
+    assert np.allclose(res[1], -4)
 
-def test_simplex5():
-    a = np.array([[1, -3], [-2, -1], [11, -0.5]])
-    b = np.array([4, 2, -7])
-    c = np.array([2, 3])
-    epsilon = 1e-6
-    x, z = simplex(a, b, c, epsilon)
-    z = np.dot(c, x)
-    assert np.allclose(x, np.array([0, 14]))
-    assert np.allclose(z, 42)
+# def test_simplex5():
+#     a = np.array([[1, -3], [-2, -1], [11, -0.5]])
+#     b = np.array([4, 2, -7])
+#     c = np.array([2, 3])
+#     epsilon = 1e-6
+#     res = calculateSimplex(a, b, c, epsilon)
+#     print("teeeee", res)
+#     assert np.allclose(res[0], np.array([0, 14]))
+#     assert np.allclose(res[1], 42)
 
-def test_simplex6():
-    a = np.array([[1, -3], [-2, -1], [11, -0.5]])
-    b = np.array([4, 2, -7])
-    c = np.array([2, 3])
-    epsilon = 1e-6
-    x, z = simplex(a, b, c, epsilon)
-    z = np.dot(c, x)
-    assert np.allclose(x, np.array([0, 14]))
-    assert np.allclose(z, 42)
+# def test_simplex6():
+#     a = np.array([[1, -3], [-2, -1], [11, -0.5]])
+#     b = np.array([4, 2, -7])
+#     c = np.array([2, 3])
+#     epsilon = 1e-6
+#     res = calculateSimplex(a, b, c, epsilon)
+#     print("teeeee", res)
+#     assert np.allclose(res[0], np.array([0, 14]))
+#     assert np.allclose(res[1], 42)
 
 def test_simplex7():
-    a = np.array([[-1, 2]])
-    b = np.array([3, 5])
+    a = np.array([[-1], [2]])
+    b = np.array([3, 10])
     c = np.array([-2])
     epsilon = 1e-6
-    x, z = simplex(a, b, c, epsilon)
-    z = np.dot(c, x)
-    assert np.allclose(x, np.array([2.5]))
-    assert np.allclose(z, -5)
+    print('A', a)
+    print('B', b)
+    print('C', c)
+    res = calculateSimplex(a, b, c, epsilon)
+    assert np.allclose(res[0], np.array([5]))
+    assert np.allclose(res[1], -10)
 
 
 

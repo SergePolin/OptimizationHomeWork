@@ -122,13 +122,7 @@ def simplex(a, b, c, epsilon):
     return x
 
 
-def main():
-    c = np.array(list(map(float, input("Enter the coefficients of the objective function: ").split())))
-    m, n = map(int, input("Enter the size of matrix A (Example: 3 4): ").split())
-    print("Enter the coefficients of constraint functions:")
-    a = np.array([list(map(float, input().split())) for _ in range(m)])
-    b = np.array(list(map(float, input("Enter the right-hand side numbers of constraint functions: ").split())))
-    epsilon = float(input("Enter the approximation accuracy: "))
+def calculateSimplex(a,b,c,epsilon):
 
     x = simplex(a, b, c, epsilon)
 
@@ -139,8 +133,15 @@ def main():
     return [x,z]
 
 if __name__ == "__main__":
-   res = main()
-   if res != -1:
-    print("The optimal solution is:")
-    print_vector(res[0])
-    print("The minimum value of the objective function is:", res[1])
+    c = np.array(list(map(float, input("Enter the coefficients of the objective function: ").split())))
+    m, n = map(int, input("Enter the size of matrix A (Example: 3 4): ").split())
+    print("Enter the coefficients of constraint functions:")
+    a = np.array([list(map(float, input().split())) for _ in range(m)])
+    b = np.array(list(map(float, input("Enter the right-hand side numbers of constraint functions: ").split())))
+    epsilon = float(input("Enter the approximation accuracy: "))
+    res = calculateSimplex(a,b,c,epsilon)
+    if res != -1:
+        print("The optimal solution is:")
+        print_vector(res[0])
+        print("The minimum value of the objective function is:", res[1])
+
