@@ -132,6 +132,15 @@ def calculateSimplex(a,b,c,epsilon):
     z = np.dot(c, x)
     return [x,z]
 
+def calculateMatrixD(c,b):
+    m = len(b)
+    n = len(c)
+    H = np.ones((1,m+n))
+    D = np.zeros((m+n,m+n))
+    for i in range(m+n):
+        D[i,i] = H[0,i]
+    return D
+
 if __name__ == "__main__":
     c = np.array(list(map(float, input("Enter the coefficients of the objective function: ").split())))
     m, n = map(int, input("Enter the size of matrix A (Example: 3 4): ").split())

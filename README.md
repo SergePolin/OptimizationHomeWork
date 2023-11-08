@@ -18,6 +18,8 @@ git clone https://github.com/SergePolin/OptimizationHomeWork
 cd OptimizationHomeWork
 pip install -r requirements.txt
 python homework1.py
+# or
+python homework2.py
 ```
 
 # How to run tests
@@ -27,7 +29,8 @@ pytest tests.py
 
 ## Example
 
-```
+```bash
+# input
 Enter the coefficients of the objective function: 2 3 -1
 Enter the size of matrix A (Example: 3 4): 2 3
 Enter the coefficients of constraint functions:
@@ -35,6 +38,7 @@ Enter the coefficients of constraint functions:
 2 -1 1
 Enter the right-hand side numbers of constraint functions: 4 2
 Enter the approximation accuracy: 1e-6
+# output
 The optimal solution is:
 0.0 0.0 2.0
 The minimum value of the objective function is: -2.0

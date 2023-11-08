@@ -163,3 +163,4 @@ cython_debug/
 n_test.py
 n_test2.py
 n_homework1.py
+.cosine
