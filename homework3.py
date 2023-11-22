@@ -18,178 +18,95 @@ def check_applicable(S, C, D):
 
 
 # Vogel's approximation method
-def vogel(S, C, D):
-    x0 = np.array([[0]*len(D)]*len(S)) # List to store the initial basic feasible solution
-    index_r, index_c = -1, -1 # The index of row and column that will be changed
+def vogel(costs, supply, demand):
+    INF = 10 ** 10
+    n, m = costs.shape
 
-    # Check if the problem is balanced and method is aplicable
-    check_applicable(S, C, D)
-    check_balance(S, C, D)
+    initial_solution = np.zeros((n, m), dtype=int)
 
-    # Function to find difference between two min elements in each row
-    def min_dif_row(C):
-        mind_row = [0]*len(S)
-        for i in range(len(C)):
-            if sorted(C[i])[1] != M:
-                mind_row[i] += abs(sorted(C[i])[0] - sorted(C[i])[1])
-        return mind_row
-    
-    # Function to find difference between two min elements in each column
-    def min_dif_col(C):
-        mind_col = [0]*len(D)
-        for i in range(len(C.T)):
-            if sorted(C.T[i])[1] != M:
-                mind_col[i] += abs(sorted(C.T[i])[0] - sorted(C.T[i])[1])
-        return mind_col
-    
-    # Function to set M-s
-    def set_M(C, r_c, index): # Matrix C, row or column, index of r_c
-        if r_c == "c":
-            C = C.transpose()
-            C[index] = [M]*len(C[index])
-            C = C.transpose()
-        elif r_c == "r":
-            C[index] = [M]*len(C[index])
-    
-    # Main loop
-    while True:
-        index_c, index_r = -1, -1
-        # Check if the algorithm is still applicable
-        flag_to_break = True
-        for i in range(len(S)):
-            if S[i] != 0:
-                flag_to_break = False
-                break
-        if flag_to_break:
-            break
+    # check if the problem is balanced
+    check_balance(supply, costs, demand)
 
-        # Step 1 - Find difference between two min elements in each row and column
-        mind_row = min_dif_row(C)
-        mind_col = min_dif_col(C)
+    # check if the method is applicable
+    check_applicable(supply, costs, demand)
 
-        # Step 2 - Determine the row or column to manipulate
-        max_md_r = max(mind_row)
-        max_md_c = max(mind_col)
-        if max_md_r > max_md_c:
-            index_r = mind_row.index(max_md_r)
+
+    def find_diff(costs):
+        row_diff = np.array([np.partition(row, 1)[1] - np.partition(row, 0)[0] for row in costs])
+        col_diff = np.array([np.partition(costs[:, col], 1)[1] - np.partition(costs[:, col], 0)[0] for col in range(m)])
+        return row_diff, col_diff
+
+    while np.max(supply) != 0 or np.max(demand) != 0:
+        row_diff, col_diff = find_diff(costs)
+        maxi1 = np.max(row_diff)
+        maxi2 = np.max(col_diff)
+
+        if maxi1 >= maxi2:
+            for ind, val in enumerate(row_diff):
+                if val == maxi1:
+                    mini1 = np.min(costs[ind])
+                    ind2 = np.argmin(costs[ind])
+                    mini2 = min(supply[ind], demand[ind2])
+                    supply[ind] -= mini2
+                    demand[ind2] -= mini2
+                    initial_solution[ind][ind2] = mini2
+                    if demand[ind2] == 0:
+                        costs[:, ind2] = INF
+                    else:
+                        costs[ind] = INF
+                    break
         else:
-            index_c = mind_col.index(max_md_c)
-        
-        if index_r != -1:
-            index_c = list(C[index_r]).index(min(C[index_r]))
-        else:
-            index_r = list(C.transpose()[index_c]).index(min(C.transpose()[index_c]))
+            for ind, val in enumerate(col_diff):
+                if val == maxi2:
+                    mini1 = INF
+                    for j in range(n):
+                        mini1 = min(mini1, costs[j, ind])
+                    ind2 = np.argmin(costs[:, ind])
+                    mini2 = min(supply[ind2], demand[ind])
+                    supply[ind2] -= mini2
+                    demand[ind] -= mini2
+                    initial_solution[ind2][ind] = mini2
+                    if demand[ind] == 0:
+                        costs[:, ind] = INF
+                    else:
+                        costs[ind2] = INF
+                    break
 
-        x0[index_r][index_c] = min(S[index_r], D[index_c])
+    return [j for i in initial_solution for j in i]
 
-        # Step 3 - Change S and D
-        S[index_r] -= x0[index_r][index_c]
-        D[index_c] -= x0[index_r][index_c]
+def russell(costs, supply, demand):
+    costs = np.array(costs)
+    supply = np.array(supply)
+    demand = np.array(demand)
+    initial_solution = np.zeros_like(costs)
 
-        # Step 4 - Set M-s in column or in row of C
-        if S[index_r] == 0:
-            set_M(C, "r", index_r)
-        else:
-            set_M(C, "c", index_c)
+    # check if the problem is balanced
+    check_balance(supply, costs, demand)
 
-        # Repeat
-    return [j for i in x0 for j in i]
+    # check if the method is applicable
+    check_applicable(supply, costs, demand)
 
-def russel(S, C, D):
-    x0 = np.array([[0]*len(D)]*len(S)) # List to store the initial basic feasible solution
-    index_r, index_c = -1, -1 # The index of row and column that will be changed
+    while np.any(supply) and np.any(demand):
+        max_in_rows = np.max(costs * (supply[:, None] > 0), axis=1)
+        max_in_columns = np.max(costs * (demand > 0), axis=0)
 
-    # Check if the problem is balanced and method is aplicable
-    check_applicable(S, C, D)
-    check_balance(S, C, D)
+        new_table = costs - max_in_rows[:, None] - max_in_columns
 
-    # Function to find the max element in each row
-    def max_row(C):
-        m_r = [0]*len(S)
-        for i in range(len(C)):
-            m_r[i] = max(C[i])
-        return m_r
+        x_coord, y_coord = np.unravel_index(np.argmin(new_table, axis=None), new_table.shape)
+        value = min(supply[x_coord], demand[y_coord])
+        initial_solution[x_coord, y_coord] = value
 
-    # Function to find the max element in each column
-    def max_col(C):
-        m_c = [0]*len(D)
-        for i in range(len(C.T)):
-            m_c[i] = max(C.T[i])
-        return m_c
-    
-    # Function to calculate new matrix C_d there C_d[i][j] = C[i][j] - m_r[i] - m_c[j]
-    def new_C_d(C, m_r, m_c):
-        C_d = np.zeros((len(C), len(C[0])))
-        for i in range(len(C)):
-            for j in range(len(C[0])):
-                C_d[i][j] = C[i][j] - m_r[i] - m_c[j]
-        return C_d
+        supply[x_coord] -= value
+        demand[y_coord] -= value
 
-    
-    # Function to set M-s
-    def set_M(C, r_c, index): # Matrix C, row or column, index of r_c
-        if r_c == "c":
-            C = C.transpose()
-            C[index] = [M]*len(C[index])
-            C = C.transpose()
-        elif r_c == "r":
-            C[index] = [M]*len(C[index])
-    
-
-    # Creat lists of max values for each row and column
-    max_row_val = max_row(C)
-    max_col_val = max_col(C)
-
-    # Create new matrix C_d
-    C_d = new_C_d(C, max_row_val, max_col_val)
-    
-    # Main loop
-    while True:
-        index_c, index_r = -1, -1
-        # Check if the algorithm is still applicable
-        flag_to_break = True
-        for i in range(len(S)):
-            if S[i] != 0:
-                flag_to_break = False
-                break
-        if flag_to_break:
-            break
-
-        # Step 1 - Find the most negative element in the C_d and his index
-        min_temp = [M, C.max()]
-        for i in range(len(C_d)):
-            for j in range(len(C_d[0])):
-                if C_d[i][j] == min_temp[0]:
-                    if C[i][j] < min_temp[1]:
-                        min_temp = [C_d[i][j], C_d[i][j]]
-                        index_r = i
-                        index_c = j
-                elif C_d[i][j] < min_temp[0]:
-                    min_temp = [C_d[i][j], C[i][j]]
-                    index_r = i
-                    index_c = j
-                
-        x0[index_r][index_c] = min(S[index_r], D[index_c]) # Store the basic feasible solution
-
-        # Step 2 - Change S and D
-        S[index_r] -= x0[index_r][index_c]
-        D[index_c] -= x0[index_r][index_c]
-
-        # Step 3 - Set M-s
-        if S[index_r] == 0:
-            set_M(C_d, "r", index_r)
-        else:
-            set_M(C_d, "c", index_c)
-            
-        # Repeat
-    return [j for i in x0 for j in i]
+    return [j for i in initial_solution for j in i]
 
 def north_west(S, C, D):
-    if len(S) != C.shape[0] or len(D) != C.shape[1]:
-        return "The method is not applicable!"
-
-    if sum(S) != sum(D):
-        return "The problem is not balanced!"
+    
+    # check if the problem is balanced
+    check_balance(S, C, D)
+    # check if the method is applicable
+    check_applicable(S, C, D)
 
     x0 = np.zeros_like(C)
     i, j = 0, 0
@@ -232,10 +149,11 @@ if __name__ == "__main__":
     print(north_west(s.copy(), c.copy(), d.copy()))
     print("Vogel's approximation method:")
     print("The initial basic feasible solution is:")
-    print(vogel(s.copy(), c.copy(), d.copy()))
+    print(vogel(c.copy(), s.copy(), d.copy()))
     print("Russell's approximation method:")
     print("The initial basic feasible solution is:")
-    print(russel(s.copy(), c.copy(), d.copy()))
+    print(russell(c.copy(), s.copy(), d.copy()))
+    
 
     
     
